@@ -52,7 +52,7 @@ public class ArbolB {
                             listanodoscomparacion = ordenar(listanodoscomparacion);
                             //listanodoscomparacion = ordenarreferencias(listanodoscomparacion); 
                             registroinsertar.nodos_contenido = listanodoscomparacion;
-                            imprimir(listanodoscomparacion);
+                            //  imprimir(listanodoscomparacion);
                             insertado = true;
                             break;
                         } else {
@@ -68,7 +68,7 @@ public class ArbolB {
 
                                 Node centro = new Node(false);
                                 centro.setPosicion(listanodoscomparacion.get(indice).getPosicion());
-
+                                
                                 for (int j = 0; j < listanodoscomparacion.size(); j++) {//se hace izquierda y derecha
                                     if (j < indice) {
 
@@ -85,7 +85,12 @@ public class ArbolB {
                                     centro.nodos_izquierda.get(j).setNodos_contenido(centro.nodos_izquierda);
                                 }
 
-                                Node centropasado = centro;
+                                Node centropasado = new Node();
+                                centropasado.setHoja(centro.isHoja());
+                                centropasado.setNodos_contenido(centro.getNodos_contenido());
+                                centropasado.setNodos_izquierda(centro.getNodos_izquierda());
+                                centropasado.setNodos_derecha(centro.getNodos_derecha());
+                                centropasado.setPosicion(indice);
                                 boolean hubovuelta = false;
                                 Node centronuevo = new Node(false);
                                 for (int j = listanodospasados.size() - 1; j >= 0; j--) {//se introduce
@@ -133,7 +138,7 @@ public class ArbolB {
                                         for (int f = 0; f < centronuevo.nodos_izquierda.size(); j++) {
                                             centronuevo.nodos_derecha.get(f).setNodos_contenido(centronuevo.nodos_derecha);
                                         }
-
+                                        centronuevo.nodos_contenido.add(centronuevo);
                                     } else {
                                         if (hubovuelta == false) {
                                             listanodospasados.get(j).arreglospasados.add(centropasado);
@@ -162,7 +167,8 @@ public class ArbolB {
                                     centro.setHoja(false);
                                     centro.nodos_contenido.add(centro);
                                     insertado = true;
-
+                                    System.out.println(centro.hoja);
+                                    
                                     break;
                                 }
 
@@ -183,7 +189,7 @@ public class ArbolB {
                     }
 
                 }
-
+                
             }
 
         }
@@ -258,5 +264,37 @@ public class ArbolB {
 
         System.out.println("");
 
+    }
+
+    public void imprimirarbol(ArrayList<Listasparaimprimir> array, int indice, ArrayList<Node> contenido) {
+        if (contenido.get(0).isHoja()) {
+            array.add(new Listasparaimprimir(contenido));
+            for (int i = 0; i < array.size(); i++) {
+                for (int j = 0; j < array.get(i).lista.size(); j++) {
+                    if (j == 0) {
+                        System.out.print("[" + array.get(i).lista.get(j).posicion + ",");
+                    } else if (j == array.get(i).lista.size() - 1) {
+                        System.out.print(array.get(i).lista.get(j).posicion + "]");
+                    } else {
+                        System.out.print(array.get(i).lista.get(j).posicion + ",");
+                    }
+
+                }
+                System.out.println("");
+            }
+        } else {
+            array.add(new Listasparaimprimir(contenido));
+            for (int i = 0; i < contenido.size(); i += 2) {
+                if (i < contenido.size()) {
+
+                    contenido.addAll(contenido.get(i).nodos_izquierda);
+                    contenido.addAll(contenido.get(i).nodos_derecha);
+                }
+            }
+         //   imprimir(array.get(indice).lista);
+            indice += 1;
+            
+            imprimirarbol(array, indice, contenido);
+        }
     }
 }
