@@ -45,25 +45,35 @@ public class ArbolB {
             } else {
                 nodoscontenido.add(registroinsertar);
                 ordenar(nodoscontenido);
+                Node centronuevo = new Node(false);
                 Node nodopasado = split(nodoscontenido, k);
                 for (int j = nodospasados.size(); j >= 0; j--) {
                     if (nodospasados.get(j).arreglospasados.size() == k && j == 0) {
-                        Node centronuevo = new Node(false);
+                        centronuevo = new Node(false);
                         nodospasados.get(j).arreglospasados.add(nodopasado);
                         ordenar(nodospasados.get(j).arreglospasados);
+                        ordenarreferenciasalreves(nodospasados.get(j).arreglospasados);
                         split(nodospasados.get(j).arreglospasados, k);
-                        
                         raiz = centronuevo;
                         centronuevo.setHoja(false);
                         centronuevo.nodos_contenido.add(centronuevo);
                     } else if (nodospasados.get(j).arreglospasados.size() == k) {
-                        Node centronuevo = new Node(false);
+                        centronuevo = new Node(false);
                         nodospasados.get(j).arreglospasados.add(nodopasado);
                         nodospasados.get(j).arreglospasados = ordenarreferenciasalreves(nodospasados.get(j).arreglospasados);
                         split(nodospasados.get(j).arreglospasados, k);
                     } else {
-
+                        nodospasados.get(j).arreglospasados.add(nodopasado);
+                        ordenar(nodospasados.get(j).arreglospasados);
+                        ordenarreferenciasalreves(nodospasados.get(j).arreglospasados);
+                        nodopasado.setNodos_contenido(nodospasados.get(j).arreglospasados);
+                        nodospasados.get(j).arreglospasados = ordenar(nodospasados.get(j).arreglospasados);
+                        nodospasados.get(j).arreglospasados = ordenarreferencias(nodospasados.get(j).arreglospasados);
+                        imprimir(raiz.getNodos_contenido());
+                        break;
                     }
+                    nodopasado = new Node(false);
+                    nodopasado = centronuevo;
                 }
             }
         } else if (registroinsertar.posicion < nodoscontenido.get(i).posicion) {
