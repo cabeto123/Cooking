@@ -24,7 +24,7 @@ public class Cooking {
         while (true) {            
         System.out.println("Digite la posicion ");
         int posicion=entrada.nextInt();
-        arbol.insertar(new Node(posicion),3);    
+      //  arbol.insertar(new Node(posicion),3);    
         }
         
 

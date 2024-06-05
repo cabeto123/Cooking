@@ -33,122 +33,147 @@ public class ArbolB {
         this.raiz = raiz;
     }
 
-    public void insertar(Node registroinsertar, int k) {
-        boolean insertado = false;
-        ArrayList<arreglopasado> listanodospasados = new ArrayList();
-        ArrayList<Node> listanodoscomparacion = raiz.getNodos_contenido();
+    public void insertar(Node registroinsertar, int k, ArrayList<Node> nodoscontenido, ArrayList<arreglopasado> nodospasados, int i) {
+        if (nodoscontenido.get(0).hoja) {
+            if (nodoscontenido.size() < k) {
+                nodoscontenido.add(registroinsertar);
+                ordenar(nodoscontenido);
+                for (int j = 0; j < nodoscontenido.size(); j++) {
+                    nodoscontenido.get(j).setNodos_contenido(nodoscontenido);
+                    nodoscontenido.get(j).setHoja(true);
+                }
+            } else {
+                nodoscontenido.add(registroinsertar);
+                ordenar(nodoscontenido);
+                Node nodopasado = split(nodoscontenido, k);
+                for (int j = nodospasados.size(); j >= 0; j--) {
+                    if (nodospasados.get(j).arreglospasados.size() == k && j == 0) {
+                        Node centronuevo = new Node(false);
+                        nodospasados.get(j).arreglospasados.add(nodopasado);
+                        ordenar(nodospasados.get(j).arreglospasados);
+                        split(nodospasados.get(j).arreglospasados, k);
+                        
+                        raiz = centronuevo;
+                        centronuevo.setHoja(false);
+                        centronuevo.nodos_contenido.add(centronuevo);
+                    } else if (nodospasados.get(j).arreglospasados.size() == k) {
+                        Node centronuevo = new Node(false);
+                        nodospasados.get(j).arreglospasados.add(nodopasado);
+                        nodospasados.get(j).arreglospasados = ordenarreferenciasalreves(nodospasados.get(j).arreglospasados);
+                        split(nodospasados.get(j).arreglospasados, k);
+                    } else {
 
-        if (raiz.getPosicion() == -1) {//cuando el arbol esta vacio entonces se ingresa una raiz
+                    }
+                }
+            }
+        } else if (registroinsertar.posicion < nodoscontenido.get(i).posicion) {
 
-            raiz = registroinsertar;
-            raiz.nodos_contenido.add(raiz);
+            nodospasados.add(new arreglopasado(nodoscontenido));
+            insertar(registroinsertar, k, nodoscontenido.get(i).nodos_izquierda, nodospasados, 0);
+        } else if (registroinsertar.posicion > nodoscontenido.get(i).posicion && nodoscontenido.size() == k) {
+            nodospasados.add(new arreglopasado(nodoscontenido));
+            insertar(registroinsertar, k, nodoscontenido.get(i).nodos_izquierda, nodospasados, 0);
+        }
+        i++;
+        insertar(registroinsertar, k, nodoscontenido, nodospasados, i);
+    }
 
-        } else {//el arbol no esta vacio
-            while (insertado == false) {//hasta que el registro este insertado
-                for (int i = 0; i < listanodoscomparacion.size(); i++) {
-                    if (listanodoscomparacion.get(i).isHoja()) {
-                        if (listanodoscomparacion.size() < k) {
-                            listanodoscomparacion.add(registroinsertar);
-                            listanodoscomparacion = ordenar(listanodoscomparacion);
-                            //listanodoscomparacion = ordenarreferencias(listanodoscomparacion); 
-                            registroinsertar.nodos_contenido = listanodoscomparacion;
-                            //  imprimir(listanodoscomparacion);
-                            insertado = true;
-                            break;
-                        } else {
-                            if (listanodoscomparacion.size() == k) {
-                                listanodoscomparacion.add(registroinsertar);
-                                listanodoscomparacion = ordenar(listanodoscomparacion);
-                                int indice = k;
-                                if (impar(indice)) {
-                                    indice = ((k + 1) / 2) - 1;
-                                } else {
-                                    indice = (k / 2) - 1;
-                                }
+    public void ayuda(ArrayList<Node> listanodoscomparacion, Node registroinsertar, int k, boolean insertado, ArrayList<arreglopasado> listanodospasados) {
+        listanodoscomparacion.add(registroinsertar);
+        listanodoscomparacion = ordenar(listanodoscomparacion);
+        int indice = k;
+        if (impar(indice)) {
+            indice = ((k + 1) / 2) - 1;
+        } else {
+            indice = (k / 2) - 1;
+        }
 
-                                Node centro = new Node(false);
-                                centro.setPosicion(listanodoscomparacion.get(indice).getPosicion());
-                                
-                                for (int j = 0; j < listanodoscomparacion.size(); j++) {//se hace izquierda y derecha
-                                    if (j < indice) {
+        Node centro = new Node(false);
+        centro.setPosicion(listanodoscomparacion.get(indice).getPosicion());
 
-                                        centro.nodos_izquierda.add(listanodoscomparacion.get(j));
-                                    } else if (j > indice) {
-                                        centro.nodos_derecha.add(listanodoscomparacion.get(j));
-                                    }
+        for (int j = 0; j < listanodoscomparacion.size(); j++) {//se hace izquierda y derecha
+            if (j < indice) {
 
-                                }
-                                for (int j = 0; j < centro.nodos_derecha.size(); j++) {
-                                    centro.nodos_derecha.get(j).setNodos_contenido(centro.nodos_derecha);
-                                }
-                                for (int j = 0; j < centro.nodos_izquierda.size(); j++) {
-                                    centro.nodos_izquierda.get(j).setNodos_contenido(centro.nodos_izquierda);
-                                }
+                centro.nodos_izquierda.add(listanodoscomparacion.get(j));
+            } else if (j > indice) {
+                centro.nodos_derecha.add(listanodoscomparacion.get(j));
+            }
 
-                                Node centropasado = new Node();
-                                centropasado.setHoja(centro.isHoja());
-                                centropasado.setNodos_contenido(centro.getNodos_contenido());
-                                centropasado.setNodos_izquierda(centro.getNodos_izquierda());
-                                centropasado.setNodos_derecha(centro.getNodos_derecha());
-                                centropasado.setPosicion(indice);
-                                boolean hubovuelta = false;
-                                Node centronuevo = new Node(false);
-                                for (int j = listanodospasados.size() - 1; j >= 0; j--) {//se introduce
-                                    if (listanodospasados.get(j).arreglospasados.size() == k && j == 0) {
-                                        centronuevo = new Node(false);
-                                        listanodospasados.get(j).arreglospasados.add(centropasado);
-                                        listanodospasados.get(j).arreglospasados = ordenarreferenciasalreves(listanodospasados.get(j).arreglospasados);
-                                        centronuevo.setPosicion(listanodospasados.get(j).arreglospasados.get(indice).getPosicion());
-                                        for (int p = 0; p < listanodospasados.get(j).arreglospasados.size(); p++) {//se hace izquierda y derecha
-                                            if (p < indice) {
-                                                centronuevo.nodos_izquierda.add(listanodospasados.get(j).arreglospasados.get(p));
-                                            } else if (p > indice) {
-                                                centronuevo.nodos_derecha.add(listanodospasados.get(j).arreglospasados.get(p));
-                                            }
+        }
+        for (int j = 0; j < centro.nodos_derecha.size(); j++) {
+            centro.nodos_derecha.get(j).setNodos_contenido(centro.nodos_derecha);
+            centro.nodos_derecha.get(j).setHoja(true);
+        }
+        for (int j = 0; j < centro.nodos_izquierda.size(); j++) {
+            centro.nodos_izquierda.get(j).setNodos_contenido(centro.nodos_izquierda);
+            centro.nodos_izquierda.get(j).setHoja(true);
+        }
 
-                                        }
-                                        for (int f = 0; f < centronuevo.nodos_derecha.size(); f++) {
-                                            centronuevo.nodos_izquierda.get(f).setNodos_contenido(centronuevo.nodos_izquierda);
-                                        }
-                                        for (int f = 0; f < centronuevo.nodos_izquierda.size(); j++) {
-                                            centronuevo.nodos_derecha.get(f).setNodos_contenido(centronuevo.nodos_derecha);
-                                        }
-                                        raiz = centronuevo;
-                                        centronuevo.setHoja(false);
-                                        centronuevo.nodos_contenido.add(centronuevo);
-                                        insertado = true;
+        Node centropasado = new Node();
+        centropasado.setHoja(centro.isHoja());
+        centropasado.setNodos_contenido(centro.getNodos_contenido());
+        centropasado.setNodos_izquierda(centro.getNodos_izquierda());
+        centropasado.setNodos_derecha(centro.getNodos_derecha());
+        centropasado.setPosicion(indice);
+        boolean hubovuelta = false;
+        Node centronuevo = new Node(false);
+        for (int j = listanodospasados.size() - 1; j >= 0; j--) {//se introduce
+            if (listanodospasados.get(j).arreglospasados.size() == k && j == 0) {
+                centronuevo = new Node(false);
+                listanodospasados.get(j).arreglospasados.add(centropasado);
+                listanodospasados.get(j).arreglospasados = ordenarreferenciasalreves(listanodospasados.get(j).arreglospasados);
+                centronuevo.setPosicion(listanodospasados.get(j).arreglospasados.get(indice).getPosicion());
+                for (int p = 0; p < listanodospasados.get(j).arreglospasados.size(); p++) {//se hace izquierda y derecha
+                    if (p < indice) {
+                        centronuevo.nodos_izquierda.add(listanodospasados.get(j).arreglospasados.get(p));
+                    } else if (p > indice) {
+                        centronuevo.nodos_derecha.add(listanodospasados.get(j).arreglospasados.get(p));
+                    }
 
-                                        break;
-                                    } else if (listanodospasados.get(j).arreglospasados.size() == k) {
-                                        centronuevo = new Node(false);
-                                        listanodospasados.get(j).arreglospasados.add(centropasado);
-                                        listanodospasados.get(j).arreglospasados = ordenarreferenciasalreves(listanodospasados.get(j).arreglospasados);
-                                        centronuevo.setPosicion(listanodospasados.get(j).arreglospasados.get(indice).getPosicion());
-                                        for (int p = 0; p < listanodospasados.get(j).arreglospasados.size(); p++) {//se hace izquierda y derecha
-                                            if (p < indice) {
-                                                centronuevo.nodos_izquierda.add(listanodospasados.get(j).arreglospasados.get(p));
-                                            } else if (p > indice) {
-                                                centronuevo.nodos_derecha.add(listanodospasados.get(j).arreglospasados.get(p));
-                                            }
+                }
+                for (int f = 0; f < centronuevo.nodos_derecha.size(); f++) {
+                    centronuevo.nodos_izquierda.get(f).setNodos_contenido(centronuevo.nodos_izquierda);
+                }
+                for (int f = 0; f < centronuevo.nodos_izquierda.size(); j++) {
+                    centronuevo.nodos_derecha.get(f).setNodos_contenido(centronuevo.nodos_derecha);
+                }
+                raiz = centronuevo;
+                centronuevo.setHoja(false);
+                centronuevo.nodos_contenido.add(centronuevo);
+                insertado = true;
 
-                                        }
-                                        for (int f = 0; f < centronuevo.nodos_derecha.size(); f++) {
-                                            centronuevo.nodos_izquierda.get(f).setNodos_contenido(centronuevo.nodos_izquierda);
-                                        }
-                                        for (int f = 0; f < centronuevo.nodos_izquierda.size(); j++) {
-                                            centronuevo.nodos_derecha.get(f).setNodos_contenido(centronuevo.nodos_derecha);
-                                        }
-                                        centronuevo.nodos_contenido.add(centronuevo);
-                                    } else {
-                                        if (hubovuelta == false) {
-                                            listanodospasados.get(j).arreglospasados.add(centropasado);
-                                            listanodospasados.get(j).arreglospasados = ordenar(listanodospasados.get(j).arreglospasados);
-                                            listanodospasados.get(j).arreglospasados = ordenarreferencias(listanodospasados.get(j).arreglospasados);
-                                            imprimir(raiz.getNodos_contenido());
+                break;
+            } else if (listanodospasados.get(j).arreglospasados.size() == k) {
+                centronuevo = new Node(false);
+                listanodospasados.get(j).arreglospasados.add(centropasado);
+                listanodospasados.get(j).arreglospasados = ordenarreferenciasalreves(listanodospasados.get(j).arreglospasados);
+                centronuevo.setPosicion(listanodospasados.get(j).arreglospasados.get(indice).getPosicion());
+                for (int p = 0; p < listanodospasados.get(j).arreglospasados.size(); p++) {//se hace izquierda y derecha
+                    if (p < indice) {
+                        centronuevo.nodos_izquierda.add(listanodospasados.get(j).arreglospasados.get(p));
+                    } else if (p > indice) {
+                        centronuevo.nodos_derecha.add(listanodospasados.get(j).arreglospasados.get(p));
+                    }
 
-                                            insertado = true;
+                }
+                for (int f = 0; f < centronuevo.nodos_derecha.size(); f++) {
+                    centronuevo.nodos_izquierda.get(f).setNodos_contenido(centronuevo.nodos_izquierda);
+                }
+                for (int f = 0; f < centronuevo.nodos_izquierda.size(); j++) {
+                    centronuevo.nodos_derecha.get(f).setNodos_contenido(centronuevo.nodos_derecha);
+                }
+                centronuevo.nodos_contenido.add(centronuevo);
+            } else {
+                if (hubovuelta == false) {
+                    centropasado.setNodos_contenido(listanodospasados.get(j).arreglospasados);
+                    listanodospasados.get(j).arreglospasados.add(centropasado);
+                    listanodospasados.get(j).arreglospasados = ordenar(listanodospasados.get(j).arreglospasados);
+                    listanodospasados.get(j).arreglospasados = ordenarreferencias(listanodospasados.get(j).arreglospasados);
+                    imprimir(raiz.getNodos_contenido());
 
-                                        }
+                    insertado = true;
+
+                }
 //                                        else {
 //                                            listanodospasados.get(j).arreglospasados.add(centronuevo);
 //                                            listanodospasados.get(j).arreglospasados = ordenar(listanodospasados.get(j).arreglospasados);
@@ -156,44 +181,54 @@ public class ArbolB {
 //                                            insertado = true;
 //
 //                                        }
-                                        break;
+                break;
 
-                                    }
-                                    centropasado = new Node(false);
-                                    centropasado = centronuevo;
-                                }
-                                if (listanodospasados.size() == 0) {
-                                    raiz = centro;
-                                    centro.setHoja(false);
-                                    centro.nodos_contenido.add(centro);
-                                    insertado = true;
-                                    System.out.println(centro.hoja);
-                                    
-                                    break;
-                                }
-
-                            }
-
-                        }
-                    } else {
-                        if ((registroinsertar.getPosicion() > listanodoscomparacion.get(i).getPosicion()) == false) {
-                            listanodospasados.add(new arreglopasado(listanodoscomparacion));
-                            listanodoscomparacion = listanodoscomparacion.get(i).getNodos_izquierda();
-                            break;
-                        } else if ((registroinsertar.getPosicion() > listanodoscomparacion.get(i).getPosicion()) && (i == listanodoscomparacion.size() - 1)) {
-                            listanodospasados.add(new arreglopasado(listanodoscomparacion));
-                            listanodoscomparacion = listanodoscomparacion.get(i).getNodos_derecha();
-                            break;
-                        }
-
-                    }
-
-                }
-                
             }
+            centropasado = new Node(false);
+            centropasado = centronuevo;
+        }
+        if (listanodospasados.size() == 0) {
+            raiz = centro;
+            centro.setHoja(false);
+            centro.nodos_contenido.add(centro);
+            insertado = true;
+            System.out.println(centro.hoja);
 
         }
 
+    }
+
+    public Node split(ArrayList<Node> listanodoscomparacion, int k) {
+
+        int indice = k;
+        if (impar(indice)) {
+            indice = ((k + 1) / 2) - 1;
+        } else {
+            indice = (k / 2) - 1;
+        }
+
+        Node centro = new Node(false);
+        centro.setPosicion(listanodoscomparacion.get(indice).getPosicion());
+
+        for (int j = 0; j < listanodoscomparacion.size(); j++) {//se hace izquierda y derecha
+            if (j < indice) {
+
+                centro.nodos_izquierda.add(listanodoscomparacion.get(j));
+            } else if (j > indice) {
+                centro.nodos_derecha.add(listanodoscomparacion.get(j));
+            }
+
+        }
+        for (int j = 0; j < centro.nodos_derecha.size(); j++) {
+            centro.nodos_derecha.get(j).setNodos_contenido(centro.nodos_derecha);
+            centro.nodos_derecha.get(j).setHoja(true);
+        }
+        for (int j = 0; j < centro.nodos_izquierda.size(); j++) {
+            centro.nodos_izquierda.get(j).setNodos_contenido(centro.nodos_izquierda);
+            centro.nodos_izquierda.get(j).setHoja(true);
+        }
+
+        return centro;
     }
 
     public int menor(ArrayList<Node> c) {
@@ -291,9 +326,9 @@ public class ArbolB {
                     contenido.addAll(contenido.get(i).nodos_derecha);
                 }
             }
-         //   imprimir(array.get(indice).lista);
+            //   imprimir(array.get(indice).lista);
             indice += 1;
-            
+
             imprimirarbol(array, indice, contenido);
         }
     }
